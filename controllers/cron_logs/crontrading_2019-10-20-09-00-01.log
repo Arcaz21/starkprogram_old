@@ -1,0 +1,1 @@
+2019-10-21 00:00:01<br>SELECT * FROM trading JOIN trading_wallet ON trading_wallet.Accnt_ID = trading.Accnt_ID JOIN accounts ON accounts.Accnt_ID = trading.Accnt_ID WHERE Payout_Date <='2019-10-21' AND status != 'paid'No Trading maturity.

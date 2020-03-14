@@ -1,0 +1,333 @@
+<?php
+//require 'structure/cache.php';
+require __DIR__."/structure/session.php";
+include __DIR__."/../../controllers/userFunctions.php";
+//echo '<pre>' . print_r($_SESSION, TRUE) . '</pre>';
+?>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!-- Meta, title, CSS, favicons, etc. -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>| Dashboard</title>
+    
+    <!-- favicon -->
+    <link rel="icon" href="../user/images/favicon.png" type="image/png" sizes="16x16">
+    <!-- Bootstrap -->
+    <link href="../vendors/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="../vendors/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    <!-- NProgress -->
+    <link href="../vendors/nprogress/nprogress.css" rel="stylesheet">
+    <!-- iCheck -->
+    <link href="../vendors/iCheck/skins/flat/green.css" rel="stylesheet">
+    <!-- Datatables -->
+    <link href="../vendors/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet">
+    <link href="../vendors/datatables.net-buttons-bs/css/buttons.bootstrap.min.css" rel="stylesheet">
+    <link href="../vendors/datatables.net-fixedheader-bs/css/fixedHeader.bootstrap.min.css" rel="stylesheet">
+    <link href="../vendors/datatables.net-responsive-bs/css/responsive.bootstrap.min.css" rel="stylesheet">
+    <link href="../vendors/datatables.net-scroller-bs/css/scroller.bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom Theme Style -->
+    <link href="../build/css/custom.css" rel="stylesheet">
+  </head>
+  <body class="nav-md">
+  <?php include "loading/startloading.php"; ?>
+    <div class="container body">
+      <div class="main_container">
+        <div class="col-md-3 left_col">
+          <div class="left_col scroll-view">
+            <div class="navbar nav_title" style="border: 0;">
+             <a href="dashboard.php" class="site_title"><img src="../user/images/favicon.png" style="margin-left: 10%; width: 70%; height: auto;"></a>
+            </div>
+
+            <div class="clearfix"></div>
+
+            <!-- menu profile quick info -->
+            <?php include "structure/quickinfo.php"?>
+            <!-- /menu profile quick info -->
+
+            <br />
+
+            <!-- sidebar menu -->
+            <?php include "structure/sidemenu.php"?>
+            <!-- /sidebar menu -->
+
+            <!-- /menu footer buttons -->
+            <div class="sidebar-footer hidden-small">
+              <a data-toggle="tooltip" data-placement="top" title="Logout" href="login.php?id=101">
+                <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
+              </a>
+            </div>
+            <!-- /menu footer buttons -->
+          </div>
+        </div>
+
+        <!-- top navigation -->
+        <?php include "structure/top_nav.php"?>
+        <!-- /top navigation -->
+
+        <!-- page content -->
+        <div class="right_col" role="main">
+          <div class="row">
+
+            <!-- top tiles -->
+            <div class="row tile_count">
+              <div class="animated flipInY col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                <div class="tile-stats">
+                  <div class="icon"><i class="fa fa-user"></i></div>
+                  <?php if($_SESSION['type']=='locked-in'): ?>
+                    <div class="count sky_blue"><?php //echo $datauser[0]['Accnt_Name']; 
+                    echo $_SESSION['username'];?></div>
+                    <h3><?php echo $datauser[0]['Package_Name']; ?></h3>
+                    <h3>Account ID: <?php echo $_SESSION['accountid'] ?></h3>
+                  <?php endif; ?>
+                  <?php if($_SESSION['type']=='trading'): ?>
+                    <div class="count sky_blue"><?php //echo $tradinguser[0]['Accnt_Name']; 
+                    echo $_SESSION['username']; ?></div>
+                    <h3>Trader</h3>
+                    <h3>Account ID: <?php echo $_SESSION['accountid'] ?></h3>
+                  <?php endif; ?>
+                  
+                </div>
+              </div>
+              <!-- Trading -->
+              <?php if($_SESSION['type']=='trading'): ?>
+              <div class="animated flipInY col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                <div class="tile-stats">
+                  <div class="icon"><i class="fa fa-money"></i></div>
+                  <div class="count sky_blue">₱<?php if($tradinguser[0]['Accnt_Bal'] != NULL): echo number_format($tradinguser[0]['Accnt_Bal'],2); else: echo "0.00"; endif; ?></div>
+                  <h3>Available BDCoins</h3>
+                </div>
+              </div>
+              <?php endif; ?>
+              <!-- End Trading -->
+              <!-- locked-in -->
+              <?php if($_SESSION['type']=='locked-in'): ?>
+                <div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                <div class="tile-stats">
+                  <div class="icon"><i class="fa fa-user"></i></div>
+                  <div class="count sky_blue"><?php if($databal->accbal != NULL): echo number_format($databal->accbal,2); else: echo "0.00"; endif; ?></div>
+                  <h3>Available BDCoins</h3>
+                </div>
+              </div>
+              <?php endif; ?>
+              <!-- End Trading -->
+              <?php if($_SESSION['type']=='trading'): ?>
+                <!-- <div class="col-md-3 col-sm-6 col-xs-6 tile_stats_count">
+                  <span class="count_top"><i class="fa fa-suitcase"></i> Encashed BDCoins</span>
+                  <div class="count sky_blue"> ₱  <?php if($tradinguser[0]['Accnt_Bal']!= NULL): echo number_format($tradinguser[0]['Accnt_Bal'],2); else: echo "0.00"; endif; ?></div>
+                  <span class="count_bottom">As of: <i class="sky_blue"><?php echo date("l").", ".date("Y-m-d"); ?></i></span>
+                </div> -->
+              <?php endif; ?>
+              <?php if($_SESSION['type']=='locked-in'): ?>
+                <!-- <div class="col-md-3 col-sm-4 col-xs-6 tile_stats_count">
+                  <span class="count_top"><i class="fa fa-suitcase"></i> Encashed BDCoins</span>
+                  <div class="count sky_blue"> ₱  <?php if($datatotalencash->totalencashed != NULL): echo number_format($databal->accbal,2); else: echo "0.00"; endif; ?></div>
+                  <span class="count_bottom">As of: <i class="sky_blue"><?php echo date("l").", ".date("Y-m-d"); ?></i></span>
+                </div> -->
+              <?php endif; ?>
+            </div>  
+            <!-- /top tiles -->
+
+            <!-- top tiles new -->
+            <div class="row top_tiles">
+                <?php error_reporting(E_ERROR | E_PARSE); foreach ($getstatnp as $index => $np): ?>
+                <div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                  <div class="tile-stats bg-sky_blue">
+                    <div class="icon"><i class="fa fa-user"></i></div>
+                    <div class="count"><?php echo $np['totalshares']; ?></div>
+                    <h3><?php echo $np['Class']; ?></h3>
+                  </div>
+                </div>
+                <?php endforeach; ?>
+              </div>
+            <!-- /top tiles new -->
+
+            <!-- forex -->
+              <div class="col-md-12 col-sm-12 col-xs-12">
+                <div class="x_panel bg-sky_blue">
+                  <div class="x_title">
+                    <h2>Gross Income</h2>
+                    <div class="clearfix"></div>
+                  </div>
+                  <div  class="x_content" style="height:400px;">
+                    <!-- TradingView Widget BEGIN -->
+                  <div class="tradingview-widget-container">
+                    <div id="tradingview_c7cf7"></div>
+                    <div class="tradingview-widget-copyright"><a href="https://www.tradingview.com/symbols/NASDAQ-AAPL/" rel="noopener" target="_blank"></a></div>
+                    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+                    <script type="text/javascript">
+                    new TradingView.widget(
+                    {
+                    "width": "auto",
+                    "height": 400,
+                    "symbol": "NASDAQ:AAPL",
+                    "interval": "D",
+                    "position": "relative",
+                    "timezone": "Etc/UTC",
+                    "theme": "Dark",
+                    "style": "1",
+                    "locale": "en",
+                    "toolbar_bg": "#f1f3f6",
+                    "enable_publishing": false,
+                    "allow_symbol_change": true,
+                    }
+                                       );
+                    </script>
+                  </div>
+                  <!-- TradingView Widget END -->
+                  </div>
+                </div>
+              </div>
+            <!-- /forex -->
+
+              <!-- fixed monthly bonus -->
+              <?php if($_SESSION['type']=='locked-in'): ?>
+              <div class="col-md-12 col-sm-12 col-xs-12">
+                <div class="x_panel">
+                  <div class="x_title">
+                    <h2 class="sky_blue">Fixed Monthly Bonus</h2>
+                    <div class="clearfix"></div>
+                  </div>
+                  <div class="x_content">
+                    <table id="datatable-responsive" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
+                      <thead>
+                        <tr class="bg-sky_blue">
+                          <th>1st Month</th>
+                          <th>2nd Month</th>
+                          <th>3rd Month</th>
+                          <th>4th Month</th>
+                          <th>5th Month</th>
+                          <th>6th Month</th>
+                          <th>7th Month</th>
+                          <th>8th Month</th>
+                          <th>9th Month</th>
+                          <th>10th Month</th>
+                          <th>11th Month</th>
+                          <th>12th Month</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>dasdas</td>
+                          <td>2000</td>
+                          <td>3000</td>
+                          <td>4000</td>
+                          <td>5000</td>
+                          <td>6000</td>
+                          <td>7000</td>
+                          <td>8000</td>
+                          <td>9000</td>
+                          <td>10000</td>
+                          <td>11000</td>
+                          <td>12000</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              <?php endif; ?>
+              <!-- /fixed monthly bonus -->
+
+              <?php if($_SESSION['type']=='trading'): ?>
+              <!-- Trading -->
+              <div class="col-md-12 col-sm-12 col-xs-12">
+                <div class="x_panel">
+                  <div class="x_title">
+                    <h2 class="sky_blue">Trading Table</h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                      <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                      </li>
+                      <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
+                        <ul class="dropdown-menu" role="menu">
+                          <li><a href="#">Settings 1</a>
+                          </li>
+                          <li><a href="#">Settings 2</a>
+                          </li>
+                        </ul>
+                      </li>
+                      <li><a class="close-link"><i class="fa fa-close"></i></a>
+                      </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                  </div>
+                  <div class="x_content">
+                    <table id="datatable-fixed-header" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
+                      <thead>
+                        <tr class="bg-sky_blue">
+                          <th>Amount</th>
+                          <th>Term</th>
+                          <th>Interest</th>
+                          <th>Entry Date</th>
+                          <th>Maturity Date</th>
+                          <th>Payout Amount</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <?php error_reporting(E_ERROR | E_PARSE); foreach ($gettrading as $index => $trade): ?>
+                        <tr>
+                          <td><?php echo $trade['Trade_Amount']; ?></td>
+                          <td><?php echo $trade['term']." days"; ?></td>
+                          <td><?php echo $trade['rate']."%"; ?></td>
+                          <td><?php echo $trade['entry_date']; ?></td>
+                          <td><?php $date=date_create($trade['Payout_Date']); echo date_format($date,"l jS \of F Y"); ?></td>
+                          <td><?php echo $trade['Payout_Amount']; ?></td>
+                          <td><?php echo $trade['status']; ?></td>
+                        </tr>
+                      <?php endforeach; ?>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              <?php endif; ?>
+              <!-- /Trading -->
+          </div>
+        </div>
+        <!-- /page content -->
+
+        <!-- footer content -->
+        <?php include"structure/footer.php"?>
+        <!-- /footer content -->
+      </div>
+    </div>
+
+  <!-- jQuery -->
+    <script src="../vendors/jquery/dist/jquery.min.js"></script>
+    <!-- Bootstrap -->
+    <script src="../vendors/bootstrap/dist/js/bootstrap.min.js"></script>
+    <!-- FastClick -->
+    <script src="../vendors/fastclick/lib/fastclick.js"></script>
+    <!-- NProgress -->
+    <script src="../vendors/nprogress/nprogress.js"></script>
+    <!-- iCheck -->
+    <script src="../vendors/iCheck/icheck.min.js"></script>
+    <!-- Datatables -->
+    <script src="../vendors/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="../vendors/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+    <script src="../vendors/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
+    <script src="../vendors/datatables.net-buttons-bs/js/buttons.bootstrap.min.js"></script>
+    <script src="../vendors/datatables.net-buttons/js/buttons.flash.min.js"></script>
+    <script src="../vendors/datatables.net-buttons/js/buttons.html5.min.js"></script>
+    <script src="../vendors/datatables.net-buttons/js/buttons.print.min.js"></script>
+    <script src="../vendors/datatables.net-fixedheader/js/dataTables.fixedHeader.min.js"></script>
+    <script src="../vendors/datatables.net-keytable/js/dataTables.keyTable.min.js"></script>
+    <script src="../vendors/datatables.net-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="../vendors/datatables.net-responsive-bs/js/responsive.bootstrap.js"></script>
+    <script src="../vendors/datatables.net-scroller/js/dataTables.scroller.min.js"></script>
+    <script src="../vendors/jszip/dist/jszip.min.js"></script>
+    <script src="../vendors/pdfmake/build/pdfmake.min.js"></script>
+    <script src="../vendors/pdfmake/build/vfs_fonts.js"></script>
+    <!-- Custom Theme Scripts -->
+    <script src="../build/js/custom.js"></script>
+  </body>
+</html>
+<?php include "loading/finishloading.php"; ?>

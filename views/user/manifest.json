@@ -1,0 +1,24 @@
+{
+
+  "author": "Ratatique",
+  "background_color": "#5bc0de",
+  "description": "A Business Managment Application developed by Ratatique",
+  "display": "fullscreen",
+  "icons": [
+  
+    {
+    "src": "images/favicon.png",
+    "sizes": "152x152",
+    "type": "image/png"
+    }
+  
+  ],
+  "manifest_version": 2,
+  "name": "BDI Trade: Business Managment Software",
+  "orientation": "any",
+  "short_name": "BDI Trade",
+  "start_url": "index.php",
+  "theme_color": "#ffffff",
+  "version": "1.0"
+  
+  }
