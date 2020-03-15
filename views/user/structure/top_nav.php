@@ -13,6 +13,8 @@
                       echo $tradinguser[0]['Full_Name'];
                     elseif($_SESSION['type'] == 'shareholder'):
                       echo $shareuser[0]['Full_Name'];
+                    elseif($_SESSION['type'] == 'dtm30'):
+                      echo $dtmuser[0]['Full_Name'];
                     else:
                       echo $datauser[0]['Full_Name'];
                     endif;

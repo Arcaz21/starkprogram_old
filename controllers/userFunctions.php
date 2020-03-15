@@ -135,6 +135,56 @@ if ($submit == "reqtradeencash") {
         </script>";
     }
 }
+if ($submit == "reqdtm30encash") {
+    $getsettings = $user->getsettings();
+    $encash['wallid'] = isset($_REQUEST['wallid']) ? $_REQUEST['wallid'] : NULL;
+    $encash['sysfee'] = $getsettings[0]['system_fee'];
+    $encash['eamount'] = isset($_REQUEST['amount']) ? $_REQUEST['amount'] : NULL;
+    $encash['etotal'] = $encash['sysfee'] + $encash['eamount'];
+    $encash['etype'] = isset($_REQUEST['etype']) ? $_REQUEST['etype'] : NULL;
+    $encash['status'] = 'requested';
+    $encash['mpin'] = isset($_REQUEST['mpin']) ? $_REQUEST['mpin'] : NULL;
+    $user->autocommitoff();
+    $checkmpin = $user->checkdtmmpin($encash['mpin'], $encash['wallid']);
+    if ($checkmpin) {
+        if ($encash['eamount'] > 0) {
+            $getwalletamount_trade = $user->getwalletamount_dtm30($encash['wallid']);
+            if ($getwalletamount_trade->amount >= ($encash['eamount'] + $encash['sysfee'])) {
+                $reqentradecash = $user->reqdtmencash($encash, $encash['etotal']);
+                if ($reqentradecash) {
+                    $user->commit();
+                    $_SESSION['script'] = "<script type='text/javascript'>
+					$(document).ready(function(e) {
+						notifyUser('tradeencashsuccess');
+					});
+					</script>";
+                    $location = "Location:" . $_SESSION['page'];
+                    $user->goto($location);
+                }
+            } else {
+                $user->rollback();
+                $_SESSION['script'] = "<script type='text/javascript'>
+				$(document).ready(function(e) {
+					notifyUser('insufficientbalance');
+				});
+				</script>";
+            }
+        } else {
+            $user->rollback();
+            $_SESSION['script'] = "<script type='text/javascript'>
+			$(document).ready(function(e) {
+				notifyUser('valueerror');
+			});
+			</script>";
+        }
+    } else {
+        $_SESSION['script'] = "<script type='text/javascript'>
+        $(document).ready(function(e) {
+            notifyUser('mpinerror');
+        });
+        </script>";
+    }
+}
 if ($submit == "reqshareencash") {
     $encash['wallid'] = isset($_REQUEST['wallid']) ? $_REQUEST['wallid'] : NULL;
     $encash['sysfee'] = 0.00;
@@ -185,118 +235,258 @@ if ($submit == "reqshareencash") {
     }
 }
 if ($submit == "addaccount") {
+    
     $validate['pin1'] = isset($_REQUEST['pin1']) ? $_REQUEST['pin1'] : NULL;
     $validate['pin2'] = isset($_REQUEST['pin2']) ? $_REQUEST['pin2'] : NULL;
     $validate['sponsor'] = isset($_REQUEST['up_idnum']) ? $_REQUEST['up_idnum'] : NULL;
-    $validate['accntname'] = isset($_REQUEST['accntname']) ? $_REQUEST['accntname'] : NULL;
-    $pinid = $user->getpinid($validate);
-    if (!$pinid) {
-        //echo "Trader";
-        $tradepinid = $user->gettradepinid($validate);
-        $validate['tradepinid'] = $tradepinid[0]['Trade_PIN_ID'];
-        //print_r($validate['tradepinid']);
-        //check if pin is used
-        $checkpins = $user->checktradepins($validate);
-        //var_dump($checkpins);
-        //check if pins exists
-        $checkpinsavail = $user->checktradepinsavail($validate);
-        //var_dump($checkpinsavail);
-        //check uplineid
-        $checksponsor = $user->checksponsor($validate['sponsor']);
-        //var_dump($checksponsor);
+    $validate['accounttype'] = isset($_REQUEST['accounttype']) ? $_REQUEST['accounttype'] : NULL;
+    
 
-        if (!$checkpins) {
-            //echo "PINS are currently not available";
+    if($validate['accounttype'] == 'trading'){
+        //die(var_dump($_REQUEST));
+        $pinid = $user->gettradepinid($validate);
+        if ($pinid) {
+            $validate['pinid'] = $pinid[0]['Trade_PIN_ID'];
+            $checkpins = $user->checktradepins($validate);
+            $checkpinsavail = $user->checktradepinsavail($validate);
+            $checksponsor = $user->checksponsor($validate['sponsor']);
+    
+            if (!$checkpins) {
+                //echo "PINS are currently not available";
+                $_SESSION['script'] = "<script type='text/javascript'>
+                $(document).ready(function(e) {
+                    notifyUser('regerror');
+                });
+                </script>";
+            }
+            if (!$checkpinsavail) {
+                $_SESSION['script'] = "<script type='text/javascript'>
+                $(document).ready(function(e) {
+                    notifyUser('regerror');
+                });
+                </script>";
+            }
+            if (!$checksponsor) {
+                //echo "No Sponsor ID Exists";
+                //echo "PINS are currently not available";
+                $_SESSION['script'] = "<script type='text/javascript'>
+                $(document).ready(function(e) {
+                    notifyUser('regerror');
+                });
+                </script>";
+            }
+            if ($checkpins && $checksponsor && $checkpinsavail) {
+                $login = new userModel();
+                $location = "Location: ../user/registration_form.php?sp=" . $validate['sponsor'] . "&p1=" . $validate['pin1'] . "&p2=" . $validate['pin2'] . "&type=Member";
+                $_SESSION['script'] = "<script type='text/javascript'>
+                $(document).ready(function(e) {
+                    notifyUser('success');
+                });
+                </script>";
+                //$login->goto($location);
+                $_SESSION['register'] =  TRUE;
+                $_SESSION['user'] =  'trader';
+            }
+        }else{
             $_SESSION['script'] = "<script type='text/javascript'>
 	        $(document).ready(function(e) {
-	            notifyUser('errorpin');
+	            notifyUser('addaccounterror');
 	        });
 	        </script>";
-        }
-        if (!$checkpinsavail) {
-            $_SESSION['script'] = "<script type='text/javascript'>
-	        $(document).ready(function(e) {
-	            notifyUser('checkpinerror');
-	        });
-	        </script>";
-        }
-        if (!$checksponsor) {
-            //echo "No Sponsor ID Exists";
-            //echo "PINS are currently not available";
-            $_SESSION['script'] = "<script type='text/javascript'>
-	        $(document).ready(function(e) {
-	            notifyUser('errorsponsor');
-	        });
-	        </script>";
-        }
-        if ($checkpins && $checksponsor && $checkpinsavail) {
-            $login = new userModel();
-            $location = "Location: ../user/registration_form.php?sp=" . $validate['sponsor'] . "&p1=" . $validate['pin1'] . "&p2=" . $validate['pin2'] . "&type=Trader";
-            $_SESSION['script'] = "<script type='text/javascript'>
-	        $(document).ready(function(e) {
-	            notifyUser('successtrade');
-	        });
-	        </script>";
-            //$login->goto($location);
-            $_SESSION['register'] =  TRUE;
-            $_SESSION['user'] =  'trader';
+            $location = "Location:" . $_SESSION['page'];
+            $user->goto($location);
         }
     }
-    if ($pinid) {
-        //echo "Member";
-        $validate['pinid'] = $pinid[0]['Pack_PIN_ID'];
-        //print_r($validate['pinid']);
-        $checkpins = $user->checkpins($validate);
-        //var_dump($checkpins);
-        $checkpinsavail = $user->checkpinsavail($validate);
-        //var_dump($checkpinsavail);
-        $checksponsor = $user->checksponsor($validate['sponsor']);
-        //var_dump($checksponsor);
-
-        if (!$checkpins) {
-            //echo "PINS are currently not available";
+    if($validate['accounttype'] == 'subscription'){
+        $pinid = $user->getpinid($validate);
+        if ($pinid) {
+            //echo "Member";
+            $validate['pinid'] = $pinid[0]['Pack_PIN_ID'];
+            //print_r($validate['pinid']);
+            $checkpins = $user->checkpins($validate);
+            //var_dump($checkpins);
+            $checkpinsavail = $user->checkpinsavail($validate);
+            //var_dump($checkpinsavail);
+            $checksponsor = $user->checksponsor($validate['sponsor']);
+            //var_dump($checksponsor);
+    
+            if (!$checkpins) {
+                //echo "PINS are currently not available";
+                $_SESSION['script'] = "<script type='text/javascript'>
+                $(document).ready(function(e) {
+                    notifyUser('regerror');
+                });
+                </script>";
+            }
+            if (!$checkpinsavail) {
+                $_SESSION['script'] = "<script type='text/javascript'>
+                $(document).ready(function(e) {
+                    notifyUser('regerror');
+                });
+                </script>";
+            }
+            if (!$checksponsor) {
+                //echo "No Sponsor ID Exists";
+                //echo "PINS are currently not available";
+                $_SESSION['script'] = "<script type='text/javascript'>
+                $(document).ready(function(e) {
+                    notifyUser('regerror');
+                });
+                </script>";
+            }
+            if ($checkpins && $checksponsor && $checkpinsavail) {
+                $login = new userModel();
+                $location = "Location: ../user/registration_form.php?sp=" . $validate['sponsor'] . "&p1=" . $validate['pin1'] . "&p2=" . $validate['pin2'] . "&type=Member";
+                $_SESSION['script'] = "<script type='text/javascript'>
+                $(document).ready(function(e) {
+                    notifyUser('success');
+                });
+                </script>";
+                //$login->goto($location);
+                $_SESSION['register'] =  TRUE;
+                $_SESSION['user'] =  'member';
+            }
+        }else{
             $_SESSION['script'] = "<script type='text/javascript'>
 	        $(document).ready(function(e) {
-	            notifyUser('regerror');
+	            notifyUser('addaccounterror');
 	        });
 	        </script>";
+            $location = "Location:" . $_SESSION['page'];
+            $user->goto($location);
         }
-        if (!$checkpinsavail) {
+    }
+    if($validate['accounttype'] == 'holdings'){
+        $pinid = $user->getpinid($validate);
+        if ($pinid) {
+            //PACKAGE AMOUNT
+            $validate['pinid'] = $pinid[0]['Share_PIN_ID'];
+            //print_r($validate);
+            $checkpins = $user->checksharepins($validate);
+            $checkpinsavail = $user->checksharepinsavail($validate);
+            $checksponsor = $user->checksharesponsor($validate['sponsor']);
+    
+            if (!$checkpins) {
+                //echo "PINS are currently not available";
+                $_SESSION['script'] = "<script type='text/javascript'>
+                $(document).ready(function(e) {
+                    notifyUser('regerror');
+                });
+                </script>";
+            }
+            if (!$checkpinsavail) {
+                $_SESSION['script'] = "<script type='text/javascript'>
+                $(document).ready(function(e) {
+                    notifyUser('regerror');
+                });
+                </script>";
+            }
+            if (!$checksponsor) {
+                //echo "No Sponsor ID Exists";
+                //echo "PINS are currently not available";
+                $_SESSION['script'] = "<script type='text/javascript'>
+                $(document).ready(function(e) {
+                    notifyUser('regerror');
+                });
+                </script>";
+            }
+            if ($checkpins && $checksponsor && $checkpinsavail) {
+                $login = new userModel();
+                $location = "Location: ../user/registration_form.php?sp=" . $validate['sponsor'] . "&p1=" . $validate['pin1'] . "&p2=" . $validate['pin2'] . "&type=Member";
+                $_SESSION['script'] = "<script type='text/javascript'>
+                $(document).ready(function(e) {
+                    notifyUser('success');
+                });
+                </script>";
+                //$login->goto($location);
+                $_SESSION['register'] =  TRUE;
+                $_SESSION['user'] =  'holdings';
+            }
+        }else{
             $_SESSION['script'] = "<script type='text/javascript'>
 	        $(document).ready(function(e) {
-	            notifyUser('regerror');
+	            notifyUser('addaccounterror');
 	        });
 	        </script>";
+            $location = "Location:" . $_SESSION['page'];
+            $user->goto($location);
         }
-        if (!$checksponsor) {
-            //echo "No Sponsor ID Exists";
-            //echo "PINS are currently not available";
+    }
+    if($validate['accounttype'] == 'dtm30'){
+        //die(var_dump($validate));
+        $pinid = $user->getdtmpin($validate);
+        //die(var_dump($pinid));
+        if ($pinid) {
+            //echo "Member";
+            $validate['pinid'] = $pinid[0]['DTM_PIN_ID'];
+            //print_r($validate['pinid']);
+            $checkpins = $user->checkdtmpins($validate);
+            //var_dump($checkpins);
+            $checkpinsavail = $user->checkdtmpinsavail($validate);
+            //var_dump($checkpinsavail);
+            //$checksponsor = $user->checkdtmsponsor($validate['sponsor']);
+            $checksponsor = TRUE;
+            //var_dump($checksponsor);
+            
+            if (!$checkpins) {
+                //echo "PINS are currently not available";
+                $_SESSION['script'] = "<script type='text/javascript'>
+                $(document).ready(function(e) {
+                    notifyUser('regerror');
+                });
+                </script>";
+            }
+            if (!$checkpinsavail) {
+                $_SESSION['script'] = "<script type='text/javascript'>
+                $(document).ready(function(e) {
+                    notifyUser('regerror');
+                });
+                </script>";
+            }
+            if (!$checksponsor) {
+                //echo "No Sponsor ID Exists";
+                //echo "PINS are currently not available";
+                $_SESSION['script'] = "<script type='text/javascript'>
+                $(document).ready(function(e) {
+                    notifyUser('regerror');
+                });
+                </script>";
+            }
+            if ($checkpins && $checksponsor && $checkpinsavail) {
+                $login = new userModel();
+                $location = "Location: ../user/registration_form.php?sp=" . $validate['sponsor'] . "&p1=" . $validate['pin1'] . "&p2=" . $validate['pin2'] . "&type=Member";
+                $_SESSION['script'] = "<script type='text/javascript'>
+                $(document).ready(function(e) {
+                    notifyUser('success');
+                });
+                </script>";
+                //$login->goto($location);
+                $_SESSION['register'] =  TRUE;
+                $_SESSION['user'] =  'dtm30';
+                
+                
+            }
+        }else{
             $_SESSION['script'] = "<script type='text/javascript'>
 	        $(document).ready(function(e) {
-	            notifyUser('regerror');
+	            notifyUser('addaccounterror');
 	        });
 	        </script>";
+            $location = "Location:" . $_SESSION['page'];
+            $user->goto($location);
         }
-        if ($checkpins && $checksponsor && $checkpinsavail) {
-            $login = new userModel();
-            $location = "Location: ../user/registration_form.php?sp=" . $validate['sponsor'] . "&p1=" . $validate['pin1'] . "&p2=" . $validate['pin2'] . "&type=Member";
-            $_SESSION['script'] = "<script type='text/javascript'>
+    }else{
+        $_SESSION['script'] = "<script type='text/javascript'>
 	        $(document).ready(function(e) {
-	            notifyUser('success');
+	            notifyUser('noaccounttype');
 	        });
 	        </script>";
-            //$login->goto($location);
-            $_SESSION['register'] =  TRUE;
-            $_SESSION['user'] =  'member';
-        }
+            $location = "Location:" . $_SESSION['page'];
+            $user->goto($location);
     }
     if (isset($_SESSION['register']) && $_SESSION['register'] == TRUE) {
         $accountmpin = $user->getaccountmpin($_SESSION['accountid']);
-        if ($_SESSION['user'] == 'trader') :
-            $reg['type'] = 'Trader';
-        else :
-            $reg['type'] = 'Member';
-        endif;
+        
         $reg['sponsor'] = $validate['sponsor'];
         $reg['pin1'] = $validate['pin1'];
         $reg['pin2'] = $validate['pin2'];
@@ -317,208 +507,143 @@ if ($submit == "addaccount") {
         //$reg['adiid'] = $register->genadiid();
         $reg['walletid'] = $user->genwalletid();
         //print_r($reg);
-
-        $pinid = $user->getpinid($reg);
-        $reg['pinid'] = $pinid[0]['Pack_PIN_ID'];
-        $addmember = TRUE;
-        if ($addmember) :
-            if ($reg['type'] != 'Trader') {
-                $reg['accnttype'] = 'locked-in';
-                $addaccount = $user->addaccount($reg);
-            } else {
-                $reg['accnttype'] = 'trading';
-                $addaccount = $user->addaccount($reg);
-            }
+        if ($_SESSION['user'] == 'trader') :
+            $reg['type'] = 'Trader';
+            $pinid = $user->gettradepinid($reg);
+            $reg['pinid'] = $pinid[0]['Trade_PIN_ID'];
+        elseif($_SESSION['user'] == 'member'):  
+            $reg['type'] = 'locked-in'; 
+            $pinid = $user->getpinid($reg);
+            $reg['pinid'] = $pinid[0]['Pack_PIN_ID']; 
+        elseif($_SESSION['user'] == 'holdings'):  
+            $reg['type'] = 'holdings';
+            $pinid = $user->getsharepin($reg);
+            $reg['pinid'] = $pinid[0]['Share_PIN_ID'];   
+        elseif($_SESSION['user'] == 'dtm30'):
+            $reg['type'] = 'dtm30';
+            $pinid = $user->getdtmpin($reg);
+            $reg['pinid'] = $pinid[0]['DTM_PIN_ID'];
         endif;
-        if ($addaccount) :
-            //echo "Add Account";
-            if ($reg['type'] != 'Trader') {
-                $pinid = $user->getpinid($reg);
-                $reg['pinid'] = $pinid[0]['Pack_PIN_ID'];
-                $addmaturity = $user->addmaturity($reg);
-            } else {
-                $addmaturity = TRUE;
-            }
-        endif;
-        if ($addmaturity) :
-            //echo "Add Maturity";
-            if ($reg['type'] != 'Trader') {
-                $addwallet = $user->addwallet($reg);
-            } else {
-                $addwallet = $user->addtradingwallet($reg);
-            }
-        endif;
-        if ($addwallet) :
-            //echo "Add Wallet";
-            if ($reg['type'] != 'Trader') {
-                $addpintoused = $user->addpintoused($reg);
-            } else {
-                $pinid = $user->gettradepinid($reg);
-                $reg['pinid'] = $pinid[0]['Trade_PIN_ID'];
-                $addpintoused = $user->addtradingpintoused($reg);
-            }
-        endif;
-        if ($addpintoused) :
-            //echo "Add Pin to Used";
-            if ($reg['type'] != 'Trader') {
-                $getpackid = $user->getpackid($reg);
-                $pinid = $user->getpinid($reg);
-                $reg['pinid'] = $pinid[0]['Pack_PIN_ID'];
-                $getpacktype = $user->getpacktype($reg['pinid']);
-                if ($getpackid->packid == 1) {
-                    if ($getpacktype->PIN_Type == 'bohol') :
-                        $checkf1s = $user->checkf1s();
-                        if ($checkf1s->fs1 < 1000) {
-                            $limit = 1000;
-                            $remainingslots = $limit - $checkf1s->fs1;
-                            $packslot = 1;
-                            $reg['npid'] = 1;
-                            if ($remainingslots >= $packslot) {
-                                $addtonp = $user->addtonp($reg);
-                            } else {
-                                $availslottoadd = $packslot - $remainingslots;
-                                $addtonp = $user->addtonp($reg);
-                            }
-                        }
-                    endif;
-
-                    $checksec = $user->checksec();
-                    if ($checksec->sec < 10000) {
-                        $limit = 10000;
-                        $remainingslots = $limit - $checksec->sec;
-                        $packslot = 1;
-                        $reg['npid'] = 2;
-                        if ($remainingslots >= $packslot) {
-                            $addtonp = $user->addtonp($reg);
-                        } else {
-                            $availslottoadd = $packslot - $remainingslots;
-                            $addtonp = $user->addtonp($reg);
-                        }
-                    }
+        $user->autocommitoff();
+        try{
+            $addmember = TRUE;
+            if ($addmember) :
+                if ($reg['type'] == 'Trader') {
+                    $reg['accnttype'] = 'trading';
+                    $addaccount = $user->addaccount($reg);
+                }elseif($reg['type'] == 'locked-in'){
+                    $reg['accnttype'] = 'locked-in';
+                    $addaccount = $user->addaccount($reg);
+                }elseif($reg['type'] == 'holdings'){
+                    $reg['accnttype'] = 'shareholder';
+                    $addaccount = $user->addaccount($reg);
+                }elseif($reg['type'] == 'dtm30'){
+                    $reg['accnttype'] = 'dtm30';
+                    $addaccount = $user->addaccount($reg);
+                }else{
+                    die('SERVER ERROR');
                 }
-                if ($getpackid->packid == 2) {
-                    if ($getpacktype->PIN_Type == 'bohol') :
-                        $checkf1s = $user->checkf1s();
-                        if ($checkf1s->fs1 < 1000) {
-                            $limit = 1000;
-                            $remainingslots = $limit - $checkf1s->fs1;
-                            $packslot = 3;
-                            $reg['npid'] = 1;
-                            if ($remainingslots >= $packslot) {
-                                for ($x = 1; $x <= $packslot; $x++) {
-                                    $addtonp = $user->addtonp($reg);
-                                }
-                            } else {
-                                $availslottoadd = $packslot - $remainingslots;
-                                for ($x = 1; $x <= $availslottoadd; $x++) {
-                                    $addtonp = $user->addtonp($reg);
-                                }
-                            }
-                        }
-                    endif;
-                    $checksec = $user->checksec();
-                    if ($checksec->sec < 10000) {
-                        $limit = 10000;
-                        $remainingslots = $limit - $checksec->sec;
-                        $packslot = 3;
-                        $reg['npid'] = 2;
-                        if ($remainingslots >= $packslot) {
-                            for ($x = 1; $x <= $packslot; $x++) {
-                                $addtonp = $user->addtonp($reg);
-                            }
-                        } else {
-                            $availslottoadd = $packslot - $remainingslots;
-                            for ($x = 1; $x <= $availslottoadd; $x++) {
-                                $addtonp = $user->addtonp($reg);
-                            }
-                        }
-                    }
+            endif;
+            if ($addaccount) :
+                //echo "Add Account";
+                if ($reg['type'] == 'locked-in') {
+                    $pinid = $user->getpinid($reg);
+                    $reg['pinid'] = $pinid[0]['Pack_PIN_ID'];
+                    $addmaturity = $user->addmaturity($reg);
+                } else {
+                    $addmaturity = TRUE;
                 }
-                if ($getpackid->packid == 3) {
-                    if ($getpacktype->PIN_Type == 'bohol') :
-                        $checkf1s = $user->checkf1s();
-                        if ($checkf1s->fs1 < 1000) {
-                            $limit = 1000;
-                            $remainingslots = $limit - $checkf1s->fs1;
-                            $packslot = 7;
-                            $reg['npid'] = 1;
-                            if ($remainingslots >= $packslot) {
-                                for ($x = 1; $x <= $packslot; $x++) {
-                                    $addtonp = $user->addtonp($reg);
-                                }
-                            } else {
-                                $availslottoadd = $packslot - $remainingslots;
-                                for ($x = 1; $x <= $availslottoadd; $x++) {
-                                    $addtonp = $user->addtonp($reg);
-                                }
-                            }
-                        }
-                    endif;
-                    $checksec = $user->checksec();
-                    if ($checksec->sec < 10000) {
-                        $limit = 10000;
-                        $remainingslots = $limit - $checksec->sec;
-                        $packslot = 7;
-                        $reg['npid'] = 2;
-                        if ($remainingslots >= $packslot) {
-                            for ($x = 1; $x <= $packslot; $x++) {
-                                $addtonp = $user->addtonp($reg);
-                            }
-                        } else {
-                            $availslottoadd = $packslot - $remainingslots;
-                            for ($x = 1; $x <= $availslottoadd; $x++) {
-                                $addtonp = $user->addtonp($reg);
-                            }
-                        }
-                    }
+            endif;
+            if ($addmaturity) :
+                if ($reg['type'] == 'Trader') {
+                    $addwallet = $user->addtradingwallet($reg);
+                }elseif($reg['type'] == 'locked-in'){
+                    $addwallet = $user->addwallet($reg);
+                }elseif($reg['type'] == 'holdings'){
+                    $addwallet = $user->addsharewallet($reg);
+                }elseif($reg['type'] == 'dtm30'){
+                    $addwallet = $user->adddtmwallet($reg);;
+                }else{
+                    die('SERVER ERROR');
                 }
-                if ($getpackid->packid == 4) {
-                    if ($getpacktype->PIN_Type == 'bohol') :
-                        $checkf1s = $user->checkf1s();
-                        if ($checkf1s->fs1 < 1000) {
-                            $limit = 1000;
-                            $remainingslots = $limit - $checkf1s->fs1;
-                            $packslot = 15;
-                            $reg['npid'] = 1;
-                            if ($remainingslots >= $packslot) {
-                                for ($x = 1; $x <= $packslot; $x++) {
-                                    $addtonp = $user->addtonp($reg);
-                                }
-                            } else {
+            endif;
+            if ($addwallet) :
+                if ($reg['type'] == 'Trader') {
+                    $addpintoused = $user->addtradingpintoused($reg);
+                }elseif($reg['type'] == 'locked-in'){
+                    $addpintoused = $user->addpintoused($reg);
+                }elseif($reg['type'] == 'holdings'){
+                    $addpintoused = $user->addsharepintoused($reg);
+                }elseif($reg['type'] == 'dtm30'){
+                    $addwallet = $user->adddtmpintoused($reg);
+                }else{
+                    die('SERVER ERROR');
+                }
+            endif;
+            if ($addpintoused) :
+                //echo "Add Pin to Used";
+                if ($reg['type'] == 'locked-in') {
+                    $getpackid = $user->getpackid($reg);
+                    $pinid = $user->getpinid($reg);
+                    $reg['pinid'] = $pinid[0]['Pack_PIN_ID'];
+                    $getpacktype = $user->getpacktype($reg['pinid']);
+                    if ($getpackid->packid == 1) {
+                        if ($getpacktype->PIN_Type == 'bohol') :
+                            $checkf1s = $user->checkf1s();
+                            if ($checkf1s->fs1 < 1000) {
+                                $limit = 1000;
+                                $remainingslots = $limit - $checkf1s->fs1;
+                                $packslot = 1;
                                 $reg['npid'] = 1;
-                                $availslottoadd = $packslot - $remainingslots;
-                                for ($x = 1; $x <= $availslottoadd; $x++) {
+                                if ($remainingslots >= $packslot) {
+                                    $addtonp = $user->addtonp($reg);
+                                } else {
+                                    $availslottoadd = $packslot - $remainingslots;
                                     $addtonp = $user->addtonp($reg);
                                 }
                             }
-                        }
-                    endif;
-                    $checksec = $user->checksec();
-                    if ($checksec->sec < 10000) {
-                        $limit = 10000;
-                        $remainingslots = $limit - $checksec->sec;
-                        $packslot = 15;
-                        $reg['npid'] = 2;
-                        if ($remainingslots >= $packslot) {
-                            for ($x = 1; $x <= $packslot; $x++) {
+                        endif;
+    
+                        $checksec = $user->checksec();
+                        if ($checksec->sec < 10000) {
+                            $limit = 10000;
+                            $remainingslots = $limit - $checksec->sec;
+                            $packslot = 1;
+                            $reg['npid'] = 2;
+                            if ($remainingslots >= $packslot) {
                                 $addtonp = $user->addtonp($reg);
-                            }
-                        } else {
-                            $availslottoadd = $packslot - $remainingslots;
-                            for ($x = 1; $x <= $availslottoadd; $x++) {
+                            } else {
+                                $availslottoadd = $packslot - $remainingslots;
                                 $addtonp = $user->addtonp($reg);
                             }
                         }
                     }
-                }
-                if ($getpackid->packid == 5) {
-                    if ($getpacktype->PIN_Type == 'bohol') :
-                        $checkf1s = $user->checkf1s();
-                        if ($checkf1s->fs1 < 1000) {
-                            $limit = 1000;
-                            $remainingslots = $limit - $checkf1s->fs1;
-                            $packslot = 31;
-                            $reg['npid'] = 1;
+                    if ($getpackid->packid == 2) {
+                        if ($getpacktype->PIN_Type == 'bohol') :
+                            $checkf1s = $user->checkf1s();
+                            if ($checkf1s->fs1 < 1000) {
+                                $limit = 1000;
+                                $remainingslots = $limit - $checkf1s->fs1;
+                                $packslot = 3;
+                                $reg['npid'] = 1;
+                                if ($remainingslots >= $packslot) {
+                                    for ($x = 1; $x <= $packslot; $x++) {
+                                        $addtonp = $user->addtonp($reg);
+                                    }
+                                } else {
+                                    $availslottoadd = $packslot - $remainingslots;
+                                    for ($x = 1; $x <= $availslottoadd; $x++) {
+                                        $addtonp = $user->addtonp($reg);
+                                    }
+                                }
+                            }
+                        endif;
+                        $checksec = $user->checksec();
+                        if ($checksec->sec < 10000) {
+                            $limit = 10000;
+                            $remainingslots = $limit - $checksec->sec;
+                            $packslot = 3;
+                            $reg['npid'] = 2;
                             if ($remainingslots >= $packslot) {
                                 for ($x = 1; $x <= $packslot; $x++) {
                                     $addtonp = $user->addtonp($reg);
@@ -530,74 +655,178 @@ if ($submit == "addaccount") {
                                 }
                             }
                         }
-                    endif;
-                    $checksec = $user->checksec();
-                    if ($checksec->sec < 10000) {
-                        $limit = 10000;
-                        $remainingslots = $limit - $checksec->sec;
-                        $packslot = 31;
-                        $reg['npid'] = 2;
-                        if ($remainingslots >= $packslot) {
-
-                            for ($x = 1; $x <= $packslot; $x++) {
-                                $addtonp = $user->addtonp($reg);
+                    }
+                    if ($getpackid->packid == 3) {
+                        if ($getpacktype->PIN_Type == 'bohol') :
+                            $checkf1s = $user->checkf1s();
+                            if ($checkf1s->fs1 < 1000) {
+                                $limit = 1000;
+                                $remainingslots = $limit - $checkf1s->fs1;
+                                $packslot = 7;
+                                $reg['npid'] = 1;
+                                if ($remainingslots >= $packslot) {
+                                    for ($x = 1; $x <= $packslot; $x++) {
+                                        $addtonp = $user->addtonp($reg);
+                                    }
+                                } else {
+                                    $availslottoadd = $packslot - $remainingslots;
+                                    for ($x = 1; $x <= $availslottoadd; $x++) {
+                                        $addtonp = $user->addtonp($reg);
+                                    }
+                                }
                             }
-                        } else {
-                            $availslottoadd = $packslot - $remainingslots;
-                            for ($x = 1; $x <= $availslottoadd; $x++) {
-                                $addtonp = $user->addtonp($reg);
+                        endif;
+                        $checksec = $user->checksec();
+                        if ($checksec->sec < 10000) {
+                            $limit = 10000;
+                            $remainingslots = $limit - $checksec->sec;
+                            $packslot = 7;
+                            $reg['npid'] = 2;
+                            if ($remainingslots >= $packslot) {
+                                for ($x = 1; $x <= $packslot; $x++) {
+                                    $addtonp = $user->addtonp($reg);
+                                }
+                            } else {
+                                $availslottoadd = $packslot - $remainingslots;
+                                for ($x = 1; $x <= $availslottoadd; $x++) {
+                                    $addtonp = $user->addtonp($reg);
+                                }
                             }
                         }
                     }
+                    if ($getpackid->packid == 4) {
+                        if ($getpacktype->PIN_Type == 'bohol') :
+                            $checkf1s = $user->checkf1s();
+                            if ($checkf1s->fs1 < 1000) {
+                                $limit = 1000;
+                                $remainingslots = $limit - $checkf1s->fs1;
+                                $packslot = 15;
+                                $reg['npid'] = 1;
+                                if ($remainingslots >= $packslot) {
+                                    for ($x = 1; $x <= $packslot; $x++) {
+                                        $addtonp = $user->addtonp($reg);
+                                    }
+                                } else {
+                                    $reg['npid'] = 1;
+                                    $availslottoadd = $packslot - $remainingslots;
+                                    for ($x = 1; $x <= $availslottoadd; $x++) {
+                                        $addtonp = $user->addtonp($reg);
+                                    }
+                                }
+                            }
+                        endif;
+                        $checksec = $user->checksec();
+                        if ($checksec->sec < 10000) {
+                            $limit = 10000;
+                            $remainingslots = $limit - $checksec->sec;
+                            $packslot = 15;
+                            $reg['npid'] = 2;
+                            if ($remainingslots >= $packslot) {
+                                for ($x = 1; $x <= $packslot; $x++) {
+                                    $addtonp = $user->addtonp($reg);
+                                }
+                            } else {
+                                $availslottoadd = $packslot - $remainingslots;
+                                for ($x = 1; $x <= $availslottoadd; $x++) {
+                                    $addtonp = $user->addtonp($reg);
+                                }
+                            }
+                        }
+                    }
+                    if ($getpackid->packid == 5) {
+                        if ($getpacktype->PIN_Type == 'bohol') :
+                            $checkf1s = $user->checkf1s();
+                            if ($checkf1s->fs1 < 1000) {
+                                $limit = 1000;
+                                $remainingslots = $limit - $checkf1s->fs1;
+                                $packslot = 31;
+                                $reg['npid'] = 1;
+                                if ($remainingslots >= $packslot) {
+                                    for ($x = 1; $x <= $packslot; $x++) {
+                                        $addtonp = $user->addtonp($reg);
+                                    }
+                                } else {
+                                    $availslottoadd = $packslot - $remainingslots;
+                                    for ($x = 1; $x <= $availslottoadd; $x++) {
+                                        $addtonp = $user->addtonp($reg);
+                                    }
+                                }
+                            }
+                        endif;
+                        $checksec = $user->checksec();
+                        if ($checksec->sec < 10000) {
+                            $limit = 10000;
+                            $remainingslots = $limit - $checksec->sec;
+                            $packslot = 31;
+                            $reg['npid'] = 2;
+                            if ($remainingslots >= $packslot) {
+    
+                                for ($x = 1; $x <= $packslot; $x++) {
+                                    $addtonp = $user->addtonp($reg);
+                                }
+                            } else {
+                                $availslottoadd = $packslot - $remainingslots;
+                                for ($x = 1; $x <= $availslottoadd; $x++) {
+                                    $addtonp = $user->addtonp($reg);
+                                }
+                            }
+                        }
+                    }
+    
+                    if ($getpackid->packid == 6) {
+                        $checkbp = $user->checkbp();
+                        if ($checkbp->bp < 200) {
+                            $reg['npid'] = 3;
+                            $addtonp = $user->addtonp($reg);
+                        }
+                    }
+                    if ($getpackid->packid == 7) {
+                        $checkdp = $user->checkdp();
+                        if ($checkdp->dp < 100) {
+                            $reg['npid'] = 4;
+                            $addtonp = $user->addtonp($reg);
+                        }
+                    }
+                } else {
+                    $addtonp = FALSE;
                 }
-
-                if ($getpackid->packid == 6) {
-                    $checkbp = $user->checkbp();
-                    if ($checkbp->bp < 200) {
-                        $reg['npid'] = 3;
-                        $addtonp = $user->addtonp($reg);
+                if ($addtonp) {
+                    $pinid = $user->getpinid($reg);
+                    $reg['pinid'] = $pinid[0]['Pack_PIN_ID'];
+                    $getbv = $user->getbv($reg);
+                    $getds = $user->getds();
+                    $dsbonus = ($getbv->bv * ($getds->rate / 100));
+                    $addsbonus = $user->addsbonus($dsbonus, $reg['accntid'], $reg['sponsor']);
+                    if ($addsbonus) {
+                        $adddown = $user->adddown($reg);
+                        if ($adddown) {
+                            $_SESSION['script'] = "<script type='text/javascript'>
+                                $(document).ready(function(e) {
+                                    notifyUser('success');
+                                });
+                                </script>";
+                            // $location = "Location: showuser.php?username=".$reg['userid']."&accntid=".$reg['accntid']."&accntname=".$reg['accntname'];
+                            // $user->goto($location);
+                        } else {
+                            echo "ERROR ADDING DOWNLINE  IN.";
+                        }
                     }
                 }
-                if ($getpackid->packid == 7) {
-                    $checkdp = $user->checkdp();
-                    if ($checkdp->dp < 100) {
-                        $reg['npid'] = 4;
-                        $addtonp = $user->addtonp($reg);
-                    }
-                }
-            } else {
-                $addtonp = FALSE;
-            }
-            if ($addtonp) {
-                $pinid = $user->getpinid($reg);
-                $reg['pinid'] = $pinid[0]['Pack_PIN_ID'];
-                $getbv = $user->getbv($reg);
-                $getds = $user->getds();
-                $dsbonus = ($getbv->bv * ($getds->rate / 100));
-                $addsbonus = $user->addsbonus($dsbonus, $reg['accntid'], $reg['sponsor']);
-                if ($addsbonus) {
-                    $adddown = $user->adddown($reg);
-                    if ($adddown) {
-                        $_SESSION['script'] = "<script type='text/javascript'>
-					        $(document).ready(function(e) {
-					            notifyUser('success');
-					        });
-					        </script>";
-                        // $location = "Location: showuser.php?username=".$reg['userid']."&accntid=".$reg['accntid']."&accntname=".$reg['accntname'];
-                        // $user->goto($location);
-                    } else {
-                        echo "ERROR ADDING DOWNLINE  IN.";
-                    }
-                }
-            }
-        endif;
+            endif;
+            $user->commit();
+        }catch(Exception $e){
+            $user->rollback();
+            die(var_dump($e));
+        }
     }
 }
 if ($submit == 'syncaccount'){
     $validate['username'] = isset($_REQUEST['username']) ? $_REQUEST['username'] : NULL;
     $validate['password'] = isset($_REQUEST['password']) ? $_REQUEST['password'] : NULL;
     $hash = $user->getpasshash($validate['username']);
-    $passhash = $user->decrypt($validate['password'], $hash->Password);
+    if($hash != NULL){
+        $passhash = $user->decrypt($validate['password'], $hash->password);
+    }
     $checkusersubscription = $user->CheckSubscription($validate['username']);
     //var_dump($checkusersubscription);
     if(!$checkusersubscription){
@@ -1155,6 +1384,50 @@ if ($submit == 'tradecash') {
 	    </script>";
     }
 }
+if($submit == 'dtm30'){    
+    //Calculate Time
+    $time = "2020-03-23";
+    $final = date("Y-m-d", strtotime("+1 month", strtotime($time)));
+    $datediff = date_diff(date_create($time),date_create($final));
+
+    $dtm['amount'] = isset($_REQUEST['amt']) ? $_REQUEST['amt'] : NULL;
+    $dtm['password'] = isset($_REQUEST['pwd']) ? $_REQUEST['pwd'] : NULL;
+    $dtm['term'] = 1;
+    $dtm['rate'] = 200;
+    $dtm['payout'] = ($dtm['amount'] * 2)/$datediff->format('%a');
+    $dtm['accntid'] = $_SESSION['accountid'];
+    $dtm['groupid'] = $user->gentradeid();
+    $dtm['pdate'] = $final;
+    $hash = $user->getpasshash($_SESSION['username']);
+    $passhash = $user->decrypt($dtm['password'], $hash->Password);
+    if ($passhash) {
+        $user->autocommitoff();
+        try{
+            //$user->subtractdtmwallet($dtm);
+            for($x = 1; $x <= $datediff->format('%a'); $x++){
+                $dtm['regdate'] = date("Y-m-d", strtotime("+1 day", strtotime($time)));
+                $user->adddtmlist($dtm);
+                $time = $dtm['regdate'];
+            }
+            $user->commit();
+            $_SESSION['script'] = "<script type='text/javascript'>
+								$(document).ready(function(e) {
+								notifyUser('success');
+								});
+							</script>";
+                    header("Location:" . $_SESSION['page']);
+        }catch(Exception $e){
+            $user->rollback();
+            die($e);
+        }
+    } else {
+        $_SESSION['script'] = "<script type='text/javascript'>
+	    $(document).ready(function(e) {
+	        notifyUser('errorpass');
+	    });
+	    </script>";
+    }
+}
 
 
 $checkusersubscription = $user->CheckSubscription($_SESSION['username']);
@@ -1243,6 +1516,8 @@ if ($_SESSION['type'] == 'locked-in') :
 //End Sponsor Maturity
 endif;
 if($_SESSION['type'] == 'shareholder'):
+    $getsettings = $user->getsettings();
+    $showaccounts = $user->showaccounts($_SESSION['username']);
     $getdownline = $user->getdownline($_SESSION['accountid']);
     $getsharedr = $user->getsharedr($_SESSION['accountid']);
     $getallencashment_share=$user->all_getencashment_share($_SESSION['accountid']);
@@ -1253,6 +1528,17 @@ if($_SESSION['type'] == 'shareholder'):
     $shareuserinfo =$user->getshareuser($_SESSION['accountid']);
     $getshrecount = $user->getShareCount($_SESSION['accountid']);
     $getShareIncome= $user->getShareIncome($_SESSION['accountid']);
+endif;
+if($_SESSION['type'] == 'dtm30'):
+    $dtm30user = $user->getdtmuser($_SESSION['accountid']);
+    $checkdtmexists = $user->checkdtmexists($_SESSION['accountid']);
+    $getsettings = $user->getsettings();
+    $getdtmwalletid = $user->getdtm30walletid($_SESSION['accountid']);
+    $showaccounts = $user->showaccounts($_SESSION['username']);
+    $dtmuser = $user->getdtmuserinfo($_SESSION['accountid']);
+    $databal = $user->getdtmbalance($_SESSION['accountid']);
+    $getdtm30list = $user->getdtmlist($_SESSION['accountid']);
+    //die(print_r($getdtm30list));
 endif;
 
 if ($page == 'profile.php') {

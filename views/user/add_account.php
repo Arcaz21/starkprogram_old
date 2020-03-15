@@ -85,6 +85,19 @@ include __DIR__."/../../controllers/userFunctions.php";
                   </div>
                   <div class="x_content">
                     <form method="POST"  action="<?php $_PHP_SELF ?>" class="form-horizontal form-label-left">
+                    <div class="item form-group">
+                        <label class="control-label col-md-3 col-sm-12 col-xs-12" for="pin1">Account Type <span class="required" style="color:red;">*</span>
+                        </label>
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                          <select class="form-control col-md-7 col-xs-12 accounttype" name="accounttype" id="accounttype">
+                            <option >Select Account Type</option>
+                            <option value="trading">Trading</option>
+                            <option value="subscription">Subscription</option>
+                            <option value="holdings">Holdings</option>
+                            <option value="dtm30">DTM30</option>
+                          </select>
+                        </div>
+                      </div>
                       <div class="item form-group">
                         <label class="control-label col-md-3 col-sm-12 col-xs-12" for="pin1">PIN 1 <span class="required" style="color:red;">*</span>
                         </label>
@@ -99,11 +112,11 @@ include __DIR__."/../../controllers/userFunctions.php";
                           <input id="pin2" class="form-control col-md-7 col-xs-12" name="pin2" placeholder="Pin Code 2" required="required" type="text">
                         </div>
                       </div>
-                      <div class="item form-group">
+                      <div class="item form-group upline">
                         <label class="control-label col-md-3 col-sm-3 col-xs-12" for="up_idnum">Upline ID # <span class="required" style="color:red;">*</span>
                         </label>
                         <div class="col-md-6 col-sm-6 col-xs-12">
-                          <input id="up_idnum" class="form-control col-md-7 col-xs-12" name="up_idnum" placeholder="Account ID (ex. ACC-CSO1)" required="required" type="text">
+                          <input id="up_idnum" class="form-control col-md-7 col-xs-12 sponsor" name="up_idnum" placeholder="Account ID (ex. ACC-CSO1)" required="required" type="text">
                         </div>
                       </div>
                       <div class="ln_solid"></div>
@@ -194,10 +207,18 @@ include __DIR__."/../../controllers/userFunctions.php";
                 styling: 'bootstrap3'
               });
           }
-          if(message =="addpackerror"){
+          if(message =="addaccounterror"){
               new PNotify({
                   title: 'Error Addng Account',
-                text: 'Credentials did not match or Pins not available.',
+                text: 'Sponsor or PINS does not exist.',
+                type: 'error',
+                styling: 'bootstrap3'
+              }); 
+          }
+          if(message =="noaccounttype"){
+              new PNotify({
+                  title: 'Error Addng Account',
+                text: 'Please select correct account type to add.',
                 type: 'error',
                 styling: 'bootstrap3'
               }); 
@@ -271,8 +292,25 @@ include __DIR__."/../../controllers/userFunctions.php";
       }
     </script>
     <?php unset($_SESSION['script']); ?>
+    <?php unset($_SESSION['script2']); ?>
+    <!-- <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script> -->
+    <script>
+     $(document).ready(function (){
+        $('.accounttype').change(function(){
+            if($(this).val() == 'dtm30'){
+              $(".upline").hide();
+              $(".sponsor").removeAttr('required');
+            }else{
+              $(".upline").show();
+              $(".sponsor").attr('required', 'required');
+
+            }
+        });
+    });
+    </script>
     <!-- Custom Theme Scripts -->
     <script src="../build/js/custom.js"></script>
+    
   </body>
 </html>
 <?php include "loading/finishloading.php"; ?>

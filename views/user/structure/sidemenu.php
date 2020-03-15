@@ -25,7 +25,7 @@
             <ul class="nav child_menu">
               <li><a href="request_encashment.php"><i class="fa fa-credit-card"></i>Request Encashment</a></li>
               <li><a href="encashment_history.php"><i class="fa fa-check-square"></i>Encashment History</a></li>
-              <li><a href="transfercoins.php"><i class="fa fa-shopping-cart"></i>Transfer BDCoins</a></li>
+              <!-- <li><a href="transfercoins.php"><i class="fa fa-shopping-cart"></i>Transfer BDCoins</a></li> -->
             </ul>
           </li>
         <?php endif; ?>
@@ -34,7 +34,7 @@
             <ul class="nav child_menu">
               <li><a href="share_request_encashment.php"><i class="fa fa-credit-card"></i>Request Encashment</a></li>
               <li><a href="share_history_encashment.php"><i class="fa fa-check-square"></i>Encashment History</a></li>
-              <li><a href="share_transfer_wallet.php"><i class="fa fa-arrows-h"></i>Transfer BDCoins</a></li>
+              <!-- <li><a href="share_transfer_wallet.php"><i class="fa fa-arrows-h"></i>Transfer BDCoins</a></li> -->
             </ul>
           </li>
         <?php endif; ?>
@@ -45,6 +45,13 @@
               <li><a href="package_list.php"><i class="fa fa-list-alt"></i>Package List</a></li>
             </ul>
           </li> -->
+        <?php endif; ?>
+        <?php if($_SESSION['type']=='dtm30' && $_SESSION['subscription'] == TRUE): ?>
+          <li><a><i class="fa fa-archive"></i>DTM30 <span class="fa fa-chevron-down"></span></a>
+            <ul class="nav child_menu">
+              <li><a href="dtm30_cash.php"><i class="fa fa-suitcase"></i>Invest Now!</a></li>
+            </ul>
+          </li>
         <?php endif; ?>
         <?php if($_SESSION['type']=='trading' && $_SESSION['subscription'] == TRUE): ?>
           <li><a><i class="fa fa-archive"></i>Trading <span class="fa fa-chevron-down"></span></a>
@@ -61,7 +68,16 @@
             <ul class="nav child_menu">
               <li><a href="tradingencashment.php"><i class="fa fa-money"></i>Encashment</a></li>
               <li><a href="trad_encash_history.php"><i class="fa fa-list"></i>Encashment History</a></li>
-              <li><a href="transfer_wallet.php"><i class="fa fa-arrows-h"></i>Transfer BDCoins</a></li>
+              <!-- <li><a href="transfer_wallet.php"><i class="fa fa-arrows-h"></i>Transfer BDCoins</a></li> -->
+            </ul>
+          </li>
+        <?php endif; ?>
+        <?php if($_SESSION['type']=='dtm30' && $_SESSION['subscription'] == TRUE): ?>
+          <li><a><i class="fa fa-credit-card"></i>Wallet <span class="fa fa-chevron-down"></span></a>
+            <ul class="nav child_menu">
+              <li><a href="dtm30encashment.php"><i class="fa fa-money"></i>Encashment</a></li>
+              <li><a href="dtm30_encash_history.php"><i class="fa fa-list"></i>Encashment History</a></li>
+              <!-- <li><a href="transfer_wallet.php"><i class="fa fa-arrows-h"></i>Transfer BDCoins</a></li> -->
             </ul>
           </li>
         <?php endif; ?>

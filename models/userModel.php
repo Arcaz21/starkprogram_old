@@ -1,7 +1,229 @@
 <?php include "DBConn.php";
 
 class userModel extends DBConn
-{
+{	
+	//Share Holdings
+	function checksharepins($member)
+	{
+		$querytz = "SET time_zone='+8:00'";
+		$resulttz = mysqli_query($this->conn, $querytz);
+		$query = "SELECT * FROM accnt_share_conn WHERE Share_PIN_ID = \"" . $member['pinid'] . "\" ";
+		$result = mysqli_query($this->conn, $query);
+		$res = array();
+		while ($row = mysqli_fetch_array($result)) {
+			array_push($res, $row);
+		}
+		return ($result->num_rows > 0) ? FALSE : TRUE;
+	}
+	function checksharepinsavail($member)
+	{
+		$querytz = "SET time_zone='+8:00'";
+		$resulttz = mysqli_query($this->conn, $querytz);
+		$query = "SELECT * FROM share_pins WHERE Share_PIN_ID = \"" . $member['pinid'] . "\" ";
+		$result = mysqli_query($this->conn, $query);
+		$res = array();
+		while ($row = mysqli_fetch_array($result)) {
+			array_push($res, $row);
+		}
+		return ($result->num_rows > 0) ? TRUE : FALSE;
+	}
+	function checksharesponsor($id)
+	{
+		$querytz = "SET time_zone='+8:00'";
+		$resulttz = mysqli_query($this->conn, $querytz);
+		$query = "SELECT * FROM accounts WHERE Accnt_ID = \"" . $id . "\" AND Accnt_Type = 'shareholder'";
+		//print_r($query);
+		$result = mysqli_query($this->conn, $query);
+		$res = array();
+		while ($row = mysqli_fetch_array($result)) {
+			array_push($res, $row);
+		}
+		return ($result->num_rows > 0) ? TRUE : FALSE;
+	}
+	function addsharepintoused($member)
+	{
+		$querytz = "SET time_zone='+8:00'";
+		$resulttz = mysqli_query($this->conn, $querytz);
+		$query = "INSERT INTO `accnt_share_conn`(`Share_PIN_ID`, `Accnt_ID`) 
+			VALUES (\"" . $member['pinid'] . "\",\"" . $member['accntid'] . "\")";
+		//print_r($query);
+		$result = mysqli_query($this->conn, $query);
+		if (!$result) :
+			die("<strong>WARNING:</strong><br>" . mysqli_error($this->conn));
+			return FALSE;
+		else :
+			return TRUE;
+		endif;
+	}
+
+	//DTM30
+	function checkdtmpins($member)
+	{
+		$querytz = "SET time_zone='+8:00'";
+		$resulttz = mysqli_query($this->conn, $querytz);
+		$query = "SELECT * FROM accnt_dtm_conn WHERE DTM_PIN_ID = \"" . $member['pinid'] . "\" ";
+		$result = mysqli_query($this->conn, $query);
+		$res = array();
+		while ($row = mysqli_fetch_array($result)) {
+			array_push($res, $row);
+		}
+		return ($result->num_rows > 0) ? FALSE : TRUE;
+	}
+	function checkdtmpinsavail($member)
+	{
+		$querytz = "SET time_zone='+8:00'";
+		$resulttz = mysqli_query($this->conn, $querytz);
+		$query = "SELECT * FROM dtm_pins WHERE DTM_PIN_ID = \"" . $member['pinid'] . "\" ";
+		$result = mysqli_query($this->conn, $query);
+		$res = array();
+		while ($row = mysqli_fetch_array($result)) {
+			array_push($res, $row);
+		}
+		return ($result->num_rows > 0) ? TRUE : FALSE;
+	}
+	function checkdtmsponsor($id)
+	{
+		$querytz = "SET time_zone='+8:00'";
+		$resulttz = mysqli_query($this->conn, $querytz);
+		$query = "SELECT * FROM accounts WHERE Accnt_ID = \"" . $id . "\" AND Accnt_Type = 'dtm30'";
+		//print_r($query);
+		$result = mysqli_query($this->conn, $query);
+		$res = array();
+		while ($row = mysqli_fetch_array($result)) {
+			array_push($res, $row);
+		}
+		return ($result->num_rows > 0) ? TRUE : FALSE;
+	}
+	function adddtmwallet($member){
+		$querytz = "SET time_zone='+8:00'";
+		$resulttz = mysqli_query($this->conn, $querytz);
+		$query = "INSERT INTO `dtm_wallet`(`Wallet_ID`, `Accnt_ID`, `MPIN`) VALUES (\"" . $member['walletid'] . "\",\"" . $member['accntid'] . "\",\"" . $member['mpin'] . "\")";
+		$result = mysqli_query($this->conn, $query);
+		if (!$result) :
+			die("<strong>WARNING:</strong><br>" . mysqli_error($this->conn));
+			return FALSE;
+		else :
+			return TRUE;
+		endif;
+	}
+	function getdtmpin($pins)
+	{
+		$querytz = "SET time_zone='+8:00'";
+		$resulttz = mysqli_query($this->conn, $querytz);
+		$query = "SELECT DTM_PIN_ID FROM dtm_pins WHERE DTM_PIN1 = \"" . $pins['pin1'] . "\" AND DTM_PIN2 = \"" . $pins['pin2'] . "\"";
+		$result = mysqli_query($this->conn, $query);
+		$res = array();
+		while ($row = mysqli_fetch_array($result)) {
+			array_push($res, $row);
+		}
+		return ($result->num_rows > 0) ? $res : FALSE;
+	}
+	function adddtmpintoused($member)
+	{
+		$querytz = "SET time_zone='+8:00'";
+		$resulttz = mysqli_query($this->conn, $querytz);
+		$query = "INSERT INTO `accnt_dtm_conn`(`DTM_PIN_ID`, `Accnt_ID`) 
+			VALUES (\"" . $member['pinid'] . "\",\"" . $member['accntid'] . "\")";
+		//print_r($query);
+		$result = mysqli_query($this->conn, $query);
+		if (!$result) :
+			die("<strong>WARNING:</strong><br>" . mysqli_error($this->conn));
+			return FALSE;
+		else :
+			return TRUE;
+		endif;
+	}
+	function getdtmuserinfo($accntid)
+	{
+		$querytz = "SET time_zone='+8:00'";
+		$resulttz = mysqli_query($this->conn, $querytz);
+		$query = "SELECT user.User_ID as uid,Full_Name,accounts.Accnt_Name FROM dtm_pins  JOIN accnt_dtm_conn ON accnt_dtm_conn.DTM_PIN_ID = dtm_pins.DTM_PIN_ID JOIN accounts ON accounts.Accnt_ID = accnt_dtm_conn.Accnt_ID JOIN user ON user.User_ID = accounts.User_ID WHERE accounts.Accnt_ID = '$accntid'";
+		$result = mysqli_query($this->conn, $query);
+		$res = array();
+		while ($row = mysqli_fetch_array($result)) {
+			array_push($res, $row);
+		}
+		return ($result->num_rows > 0) ? $res : FALSE;
+	}
+	function getdtmbalance($accid)
+	{
+		$querytz = "SET time_zone='+8:00'";
+		$resulttz = mysqli_query($this->conn, $querytz);
+		$query = "SELECT Accnt_Bal as accbal FROM accounts JOIN dtm_wallet on dtm_wallet.Accnt_ID = accounts.Accnt_ID WHERE accounts.Accnt_ID = '$accid'";
+		//print_r($query);
+		$result = mysqli_query($this->conn, $query);
+		if (!$result) {
+			die("<strong>WARNING:</strong><br>" . mysqli_error($this->conn));
+		}
+		$row = $result->fetch_object();
+		return $row;
+	}
+	function checkdtmexists($id)
+	{
+		$querytz = "SET time_zone='+8:00'";
+		$resulttz = mysqli_query($this->conn, $querytz);
+		$query = "SELECT * FROM dtm_list WHERE Accnt_ID = \"" . $id . "\"";
+		$result = mysqli_query($this->conn, $query);
+		$res = array();
+		while ($row = mysqli_fetch_array($result)) {
+			array_push($res, $row);
+		}
+		return ($result->num_rows > 0) ? TRUE : FALSE;
+	}
+	function getdtmuser($accntid)
+	{
+		$querytz = "SET time_zone='+8:00'";
+		$resulttz = mysqli_query($this->conn, $querytz);
+		$query = "SELECT * FROM dtm_wallet JOIN accounts ON accounts.Accnt_ID = dtm_wallet.Accnt_ID JOIN user ON user.User_ID = accounts.User_ID WHERE accounts.Accnt_ID = '$accntid'";
+		$result = mysqli_query($this->conn, $query);
+		$res = array();
+		while ($row = mysqli_fetch_array($result)) {
+			array_push($res, $row);
+		}
+		return ($result->num_rows > 0) ? $res : FALSE;
+	}
+	function adddtmlist($dtm)
+	{
+		$querytz = "SET time_zone='+8:00'";
+		$resulttz = mysqli_query($this->conn, $querytz);
+		$query = "INSERT INTO `dtm_list`(`Accnt_ID`, `rate`, `term`, `Payout_Date`, `Division_Date`, `Payout_Amount`, `DTM_Amount`) 
+			VALUES (\"" . $dtm['accntid'] . "\",\"" . $dtm['rate'] . "\",\"" . $dtm['term'] . "\",\"" . $dtm['pdate'] . "\",\"" . $dtm['regdate'] . "\",\"" . $dtm['payout'] . "\",\"" . $dtm['amount'] . "\")";
+		$result = mysqli_query($this->conn, $query);
+		if (!$result) :
+			die("<strong>WARNING:</strong><br>" . mysqli_error($this->conn));
+			return FALSE;
+		else :
+			return TRUE;
+		endif;
+	}
+	function subtractdtmwallet($dtm){
+		$querytz = "SET time_zone='+8:00'";
+		$resulttz = mysqli_query($this->conn, $querytz);
+		$query = "UPDATE dtm_wallet SET dtm_wallet.Accnt_Bal = Accnt_Bal-\"" . $dtm['amount'] . "\"
+			WHERE dtm_wallet.Accnt_ID = \"" . $dtm['accntid'] . "\"";
+		//print_r($query);
+		$result = mysqli_query($this->conn, $query);
+		if (!$result) {
+
+			die("<strong>WARNING:</strong><br>" . mysqli_error($this->conn));
+		}
+		return TRUE;
+	}
+	function getdtmlist($accntid){
+		$querytz = "SET time_zone='+8:00'";
+		$resulttz = mysqli_query($this->conn, $querytz);
+		$query = "SELECT * FROM dtm_list WHERE Accnt_ID = '$accntid'";
+		$result = mysqli_query($this->conn, $query);
+		$res = array();
+		while ($row = mysqli_fetch_array($result)) {
+			array_push($res, $row);
+		}
+		return ($result->num_rows > 0) ? $res : FALSE;
+	}
+	
+	
+
+
 	function settz()
 	{
 		$querytz = "SET time_zone='+8:00'";
@@ -303,6 +525,18 @@ class userModel extends DBConn
 			array_push($res, $row);
 		}
 		return ($result->num_rows > 0) ? $res : FALSE;
+	}
+	function addsharewallet($member){
+		$querytz = "SET time_zone='+8:00'";
+		$resulttz = mysqli_query($this->conn, $querytz);
+		$query = "INSERT INTO `share_wallet`(`Wallet_ID`, `Accnt_ID`, `MPIN`) VALUES (\"" . $member['walletid'] . "\",\"" . $member['accntid'] . "\",\"" . $member['mpin'] . "\")";
+		$result = mysqli_query($this->conn, $query);
+		if (!$result) :
+			die("<strong>WARNING:</strong><br>" . mysqli_error($this->conn));
+			return FALSE;
+		else :
+			return TRUE;
+		endif;
 	}
 
 	function getprofile($username)
@@ -864,6 +1098,18 @@ class userModel extends DBConn
 		}
 		return ($result->num_rows > 0) ? $res : FALSE;
 	}
+	function getsharepin($pins)
+	{
+		$querytz = "SET time_zone='+8:00'";
+		$resulttz = mysqli_query($this->conn, $querytz);
+		$query = "SELECT Share_PIN_ID FROM share_pins WHERE Share_PIN1 = \"" . $pins['pin1'] . "\" AND Share_PIN2 = \"" . $pins['pin2'] . "\"";
+		$result = mysqli_query($this->conn, $query);
+		$res = array();
+		while ($row = mysqli_fetch_array($result)) {
+			array_push($res, $row);
+		}
+		return ($result->num_rows > 0) ? $res : FALSE;
+	}
 	function checktradepins($member)
 	{
 		$querytz = "SET time_zone='+8:00'";
@@ -1043,6 +1289,19 @@ class userModel extends DBConn
 		$row = $result->fetch_object();
 		return $row;
 	}
+	function getdtm30walletid($accid)
+	{
+		$querytz = "SET time_zone='+8:00'";
+		$resulttz = mysqli_query($this->conn, $querytz);
+		$query = "SELECT Wallet_ID as wallid FROM accounts JOIN dtm_wallet on dtm_wallet.Accnt_ID = accounts.Accnt_ID WHERE accounts.Accnt_ID = '$accid'";
+		//print_r($query);
+		$result = mysqli_query($this->conn, $query);
+		if (!$result) {
+			die("<strong>WARNING:</strong><br>" . mysqli_error($this->conn));
+		}
+		$row = $result->fetch_object();
+		return $row;
+	}
 	function gettradewalletid($accid)
 	{
 		$querytz = "SET time_zone='+8:00'";
@@ -1059,6 +1318,16 @@ class userModel extends DBConn
 
 	function getwalletamount_trade($walletid){
 		$query="SELECT Accnt_Bal as amount FROM trading_wallet WHERE Wallet_ID = '$walletid' OR Accnt_ID = '$walletid'";
+		$result = mysqli_query($this->conn, $query);
+		if (!$result) {
+			die("<strong>WARNING:</strong><br>" . mysqli_error($this->conn));
+			return FALSE;
+		}
+		$row = $result->fetch_object();
+		return $row;
+	}
+	function getwalletamount_dtm30($walletid){
+		$query="SELECT Accnt_Bal as amount FROM dtm_wallet WHERE Wallet_ID = '$walletid' OR Accnt_ID = '$walletid'";
 		$result = mysqli_query($this->conn, $query);
 		if (!$result) {
 			die("<strong>WARNING:</strong><br>" . mysqli_error($this->conn));
@@ -1158,6 +1427,38 @@ class userModel extends DBConn
 			return TRUE;
 		}
 	}
+	function reqdtmencash($encash, $etotal)
+	{
+		$querytz = "SET time_zone='+8:00'";
+		$resulttz = mysqli_query($this->conn, $querytz);
+		$query3 = "UPDATE system_fee_updatable SET System_Fee = System_Fee+\"" . $encash['sysfee'] . "\"";
+		$result3 = mysqli_query($this->conn, $query3);
+		if (!$result3) {
+			die("<strong>WARNING:</strong><br>" . mysqli_error($this->conn));
+			return FALSE;
+		}
+		$querytz = "SET time_zone='+8:00'";
+		$resulttz = mysqli_query($this->conn, $querytz);
+		$query = "INSERT INTO `dtm_encashment`(`Wallet_ID`,`Fee`, `Enc_Status`, `Enc_Amount`, `Request_Type`) 
+			VALUES (\"" . $encash['wallid'] . "\",\"" . $encash['sysfee'] . "\",\"" . $encash['status'] . "\",\"" . $encash['eamount'] . "\",\"" . $encash['etype'] . "\")";
+		//print_r($query);
+		//echo "<br>";
+		$result = mysqli_query($this->conn, $query);
+		if (!$result) {
+			die("<strong>WARNING:</strong><br>" . mysqli_error($this->conn));
+			return FALSE;
+		}
+		$query1 = "UPDATE `dtm_wallet` SET `Accnt_Bal`= (Accnt_Bal-$etotal) WHERE Wallet_ID = \"" . $encash['wallid'] . "\"";
+		//print_r($query1);
+		$result1 = mysqli_query($this->conn, $query1);
+		if (!$result) {
+			die("<strong>WARNING:</strong><br>" . mysqli_error($this->conn));
+			return FALSE;
+		}
+		if ($result && $result1) {
+			return TRUE;
+		}
+	}
 	function reqshareencash($encash, $etotal)
 	{
 		
@@ -1212,6 +1513,17 @@ class userModel extends DBConn
 		$querytz = "SET time_zone='+8:00'";
 		$resulttz = mysqli_query($this->conn, $querytz);
 		$query = "SELECT MPIN FROM trading_wallet WHERE Wallet_ID = '$wallid' AND MPIN = '$mpin'";
+		$result = mysqli_query($this->conn, $query);
+		if (!$result) {
+			die("<strong>WARNING:</strong><br>" . mysqli_error($this->conn));
+		}
+		return (($result->num_rows == 1) ? TRUE : FALSE);
+	}
+	function checkdtmmpin($mpin, $wallid)
+	{
+		$querytz = "SET time_zone='+8:00'";
+		$resulttz = mysqli_query($this->conn, $querytz);
+		$query = "SELECT MPIN FROM dtm_wallet WHERE Wallet_ID = '$wallid' AND MPIN = '$mpin'";
 		$result = mysqli_query($this->conn, $query);
 		if (!$result) {
 			die("<strong>WARNING:</strong><br>" . mysqli_error($this->conn));

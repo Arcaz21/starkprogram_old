@@ -103,6 +103,12 @@ include __DIR__ . "/../../controllers/userFunctions.php";
                 <?php endif; ?>
                 <h3>Account ID: <?php echo $_SESSION['accountid'] ?></h3>
                 <?php endif; ?>
+                <?php if ($_SESSION['type'] == 'dtm30') : ?>
+                <div class="count sky_blue"><?php //echo $tradinguser[0]['Accnt_Name']; 
+                                              echo $_SESSION['username']; ?></div>
+                <h3>DTM30</h3>
+                <h3>Account ID: <?php echo $_SESSION['accountid'] ?></h3>
+                <?php endif; ?>
 
               </div>
             </div>
@@ -145,6 +151,19 @@ include __DIR__ . "/../../controllers/userFunctions.php";
             </div>
             <?php endif; ?>
             <!-- End locked-in -->
+            <!-- DTM30 -->
+            <?php if ($_SESSION['type'] == 'dtm30') : ?>
+            <div class="animated flipInY col-lg-6 col-md-6 col-sm-6 col-xs-12">
+              <div class="tile-stats">
+                <div class="icon"><i class="fa fa-user"></i></div>
+                <div class="count sky_blue"><?php if ($databal->accbal != NULL) : echo '<i class="fa fa-gg"></i> ' . number_format($databal->accbal, 2);
+                                              else : echo "0.00";
+                                              endif; ?></div>
+                <h3>Available BDCoins</h3>
+              </div>
+            </div>
+            <?php endif; ?>
+            <!-- End DTM30 -->
           </div>
           <!-- /top tiles -->
 
