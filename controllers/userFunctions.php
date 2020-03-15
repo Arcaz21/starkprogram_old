@@ -246,7 +246,7 @@ if ($submit == "addaccount") {
         //die(var_dump($_REQUEST));
         $pinid = $user->gettradepinid($validate);
         if ($pinid) {
-            $validate['pinid'] = $pinid[0]['Trade_PIN_ID'];
+            $validate['tradepinid'] = $pinid[0]['Trade_PIN_ID'];
             $checkpins = $user->checktradepins($validate);
             $checkpinsavail = $user->checktradepinsavail($validate);
             $checksponsor = $user->checksponsor($validate['sponsor']);
@@ -475,7 +475,8 @@ if ($submit == "addaccount") {
             $location = "Location:" . $_SESSION['page'];
             $user->goto($location);
         }
-    }else{
+    }
+    if($validate['accounttype'] == NULL){
         $_SESSION['script'] = "<script type='text/javascript'>
 	        $(document).ready(function(e) {
 	            notifyUser('noaccounttype');
