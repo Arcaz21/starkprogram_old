@@ -75,8 +75,8 @@
         <?php if($_SESSION['type']=='dtm30' && $_SESSION['subscription'] == TRUE): ?>
           <li><a><i class="fa fa-credit-card"></i>Wallet <span class="fa fa-chevron-down"></span></a>
             <ul class="nav child_menu">
-              <li><a href="dtm30encashment.php"><i class="fa fa-money"></i>Encashment</a></li>
-              <li><a href="dtm30_encash_history.php"><i class="fa fa-list"></i>Encashment History</a></li>
+              <!-- <li><a href="dtm30encashment.php"><i class="fa fa-money"></i>Encashment</a></li>
+              <li><a href="dtm30_encash_history.php"><i class="fa fa-list"></i>Encashment History</a></li> -->
               <!-- <li><a href="transfer_wallet.php"><i class="fa fa-arrows-h"></i>Transfer BDCoins</a></li> -->
             </ul>
           </li>

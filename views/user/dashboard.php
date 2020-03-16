@@ -504,6 +504,54 @@ include __DIR__ . "/../../controllers/userFunctions.php";
           <?php endif; ?>
           <!-- /Share Holder -->
 
+          <?php if ($_SESSION['type'] == 'dtm30') : ?>
+          <!-- Share Holder -->
+          <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+              <div class="x_title">
+                <h2 class="sky_blue">Trading Table</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                  <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                  </li>
+                  <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
+                  </li>
+                  <li><a class="close-link"><i class="fa fa-close"></i></a>
+                  </li>
+                </ul>
+                <div class="clearfix"></div>
+              </div>
+              <div class="x_content">
+                    <table id="datatable-fixed-header" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
+                      <thead>
+                        <tr class="bg-sky_blue">
+                          <th>Amount</th>
+                          <th>Term</th>
+                          <th>Interest</th>
+                          <th>Income Date</th>
+                          <th>Payout Date</th>
+                          <th>Payout Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <?php error_reporting(E_ERROR | E_PARSE); foreach ($getdtm30list as $index => $list): ?>
+                        <tr>
+                          <td><?php echo $list['DTM_Amount']; ?></td>
+                          <td><?php echo $list['term']." month"; ?></td>
+                          <td><?php echo $list['rate']."%"; ?></td>
+                          <td><?php $date=date_create($list['Division_Date']); echo date_format($date,"l jS \of F Y"); ?></td>
+                          <td><?php $date=date_create($list['Payout_Date']); echo date_format($date,"l jS \of F Y"); ?></td>
+                          <td><?php echo number_format($list['Payout_Amount'],2); ?></td>
+                        </tr>
+                      <?php endforeach; ?>
+                      </tbody>
+                    </table>
+                  </div>
+            </div>
+          </div>
+          <?php endif; ?>
+          <!-- /Share Holder -->
+
           
         </div>
       </div>
