@@ -1404,7 +1404,7 @@ if($submit == 'dtm30'){
     if ($passhash) {
         $user->autocommitoff();
         try{
-            //$user->subtractdtmwallet($dtm);
+            $user->subtractdtmwallet($dtm);
             for($x = 1; $x <= $datediff->format('%a'); $x++){
                 $dtm['regdate'] = date("Y-m-d", strtotime("+1 day", strtotime($time)));
                 $user->adddtmlist($dtm);
