@@ -1721,7 +1721,7 @@ class userModel extends DBConn
 	function addaccount($member)
 	{
 		$query2 = "INSERT INTO `accounts`(`Accnt_ID`, `User_ID`, `Accnt_Name`, `Upline_ID`, Accnt_Type) 
-					   VALUES (\"" . $member['accntid'] . "\",\"" . $member['userid'] . "\",\"" . $member['accntname'] . "\",\"" . $member['sponsor'] . "\",\"" . $member['accnttype'] . "\")";
+					   VALUES (\"" . $member['accntid'] . "\",\"" . $member['userid'] . "\",\"" . $member['accntname'] . "\",\"" .$_SESSION['accountid'] . "\",\"" . $member['accnttype'] . "\")";
 		$result = mysqli_query($this->conn, $query2);
 		if (!$result) :
 			die("<strong>WARNING:</strong><br>" . mysqli_error($this->conn));
