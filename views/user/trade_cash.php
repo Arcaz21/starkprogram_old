@@ -278,6 +278,14 @@ include __DIR__."/../../controllers/userFunctions.php";
                 styling: 'bootstrap3'
               });
           }
+          if(message == "double") {
+              new PNotify({
+                title: 'Request Error!',
+                text: 'You have an existing trade.',
+                type: 'error',
+                styling: 'bootstrap3'
+              });
+          }
       }
       function checkForm(form) 
         {

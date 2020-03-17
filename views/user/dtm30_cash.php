@@ -256,8 +256,8 @@ include __DIR__."/../../controllers/userFunctions.php";
       function notifyUser(message) {
           if(message == "success") {
               new PNotify({
-                title: 'Trading Success!  ',
-                text: 'You have traded your cash. Please see trading table for details.',
+                title: 'Investment Success!  ',
+                text: 'You have invested your cash. Please see investment table for details.',
                 type: 'success',
                 styling: 'bootstrap3'
               });
@@ -270,10 +270,10 @@ include __DIR__."/../../controllers/userFunctions.php";
                 styling: 'bootstrap3'
               });
           }
-          if(message == "expired") {
+          if(message == "investmenterror") {
               new PNotify({
                 title: 'Request Error!',
-                text: 'Trading Time is Expired. Please Wait for thr admin to activate new dates.',
+                text: 'You have already invested. Please add account to invest again.',
                 type: 'error',
                 styling: 'bootstrap3'
               });

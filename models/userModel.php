@@ -94,6 +94,17 @@ class userModel extends DBConn
 		}
 		return ($result->num_rows > 0) ? TRUE : FALSE;
 	}
+	function checkdtm30($accntid){
+		$querytz = "SET time_zone='+8:00'";
+		$resulttz = mysqli_query($this->conn, $querytz);
+		$query = "SELECT * FROM dtm_list WHERE Accnt_ID = '$accntid'";
+		$result = mysqli_query($this->conn, $query);
+		$res = array();
+		while ($row = mysqli_fetch_array($result)) {
+			array_push($res, $row);
+		}
+		return ($result->num_rows > 0) ? FALSE : TRUE;
+	}
 	function adddtmwallet($member){
 		$querytz = "SET time_zone='+8:00'";
 		$resulttz = mysqli_query($this->conn, $querytz);

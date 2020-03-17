@@ -1153,6 +1153,17 @@ if ($submit == 'tradecash') {
     //echo $tradeid;
     $hash = $user->getpasshash($_SESSION['username']);
     $passhash = $user->decrypt($trade['password'], $hash->Password);
+    $checktradingexists = $user->checktradingexists($_SESSION['accountid']);
+    //die(var_dump($checkdtm30));
+    if($checktradingexists){
+        $_SESSION['script'] = "<script type='text/javascript'>
+	    $(document).ready(function(e) {
+	        notifyUser('double');
+	    });
+        </script>";
+        $location = "Location:" . $_SESSION['page'];
+        $user->goto($location);
+    }
     if ($passhash) {
         $currdate = $user->getcurrdate();
         $date = $currdate->currdate;
@@ -1412,7 +1423,9 @@ if ($submit == 'tradecash') {
 	    $(document).ready(function(e) {
 	        notifyUser('errorpass');
 	    });
-	    </script>";
+        </script>";
+        $location = "Location:" . $_SESSION['page'];
+        $user->goto($location);
     }
 }
 if($submit == 'dtm30'){    
@@ -1431,6 +1444,17 @@ if($submit == 'dtm30'){
     $dtm['pdate'] = $final;
     $hash = $user->getpasshash($_SESSION['username']);
     $passhash = $user->decrypt($dtm['password'], $hash->Password);
+    $checkdtm30 = $user->checkdtm30($dtm['accntid']);
+    //die(var_dump($checkdtm30));
+    if(!$checkdtm30){
+        $_SESSION['script'] = "<script type='text/javascript'>
+	    $(document).ready(function(e) {
+	        notifyUser('investmenterror');
+	    });
+        </script>";
+        $location = "Location:" . $_SESSION['page'];
+        $user->goto($location);
+    }
     if ($passhash) {
         $user->autocommitoff();
         try{
@@ -1446,7 +1470,8 @@ if($submit == 'dtm30'){
 								notifyUser('success');
 								});
 							</script>";
-                    header("Location:" . $_SESSION['page']);
+            $location = "Location:" . $_SESSION['page'];
+            $user->goto($location);
         }catch(Exception $e){
             $user->rollback();
             die($e);
@@ -1456,7 +1481,9 @@ if($submit == 'dtm30'){
 	    $(document).ready(function(e) {
 	        notifyUser('errorpass');
 	    });
-	    </script>";
+        </script>";
+        $location = "Location:" . $_SESSION['page'];
+        $user->goto($location);
     }
 }
 
