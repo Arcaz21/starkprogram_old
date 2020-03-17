@@ -207,6 +207,14 @@ include __DIR__."/../../controllers/userFunctions.php";
                 styling: 'bootstrap3'
               });
           }
+          if(message =="pinsused"){
+              new PNotify({
+                  title: 'Error Addng Account',
+                text: 'PINS are already in use.',
+                type: 'error',
+                styling: 'bootstrap3'
+              }); 
+          }
           if(message =="addaccounterror"){
               new PNotify({
                   title: 'Error Addng Account',

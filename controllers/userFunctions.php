@@ -252,12 +252,14 @@ if ($submit == "addaccount") {
             $checksponsor = $user->checksponsor($validate['sponsor']);
     
             if (!$checkpins) {
-                //echo "PINS are currently not available";
-                $_SESSION['script'] = "<script type='text/javascript'>
-                $(document).ready(function(e) {
-                    notifyUser('regerror');
-                });
-                </script>";
+                 //echo "PINS are currently not available";
+                 $_SESSION['script'] = "<script type='text/javascript'>
+                 $(document).ready(function(e) {
+                     notifyUser('pinsused');
+                 });
+                 </script>";
+                 $location = "Location:" . $_SESSION['page'];
+                 $user->goto($location);
             }
             if (!$checkpinsavail) {
                 $_SESSION['script'] = "<script type='text/javascript'>
@@ -265,6 +267,8 @@ if ($submit == "addaccount") {
                     notifyUser('regerror');
                 });
                 </script>";
+                $location = "Location:" . $_SESSION['page'];
+                 $user->goto($location);
             }
             if (!$checksponsor) {
                 //echo "No Sponsor ID Exists";
@@ -274,6 +278,8 @@ if ($submit == "addaccount") {
                     notifyUser('regerror');
                 });
                 </script>";
+                $location = "Location:" . $_SESSION['page'];
+                 $user->goto($location);
             }
             if ($checkpins && $checksponsor && $checkpinsavail) {
                 $login = new userModel();
@@ -311,12 +317,14 @@ if ($submit == "addaccount") {
             //var_dump($checksponsor);
     
             if (!$checkpins) {
-                //echo "PINS are currently not available";
-                $_SESSION['script'] = "<script type='text/javascript'>
-                $(document).ready(function(e) {
-                    notifyUser('regerror');
-                });
-                </script>";
+                 //echo "PINS are currently not available";
+                 $_SESSION['script'] = "<script type='text/javascript'>
+                 $(document).ready(function(e) {
+                     notifyUser('pinsused');
+                 });
+                 </script>";
+                 $location = "Location:" . $_SESSION['page'];
+                 $user->goto($location);
             }
             if (!$checkpinsavail) {
                 $_SESSION['script'] = "<script type='text/javascript'>
@@ -324,6 +332,8 @@ if ($submit == "addaccount") {
                     notifyUser('regerror');
                 });
                 </script>";
+                $location = "Location:" . $_SESSION['page'];
+                 $user->goto($location);
             }
             if (!$checksponsor) {
                 //echo "No Sponsor ID Exists";
@@ -333,6 +343,8 @@ if ($submit == "addaccount") {
                     notifyUser('regerror');
                 });
                 </script>";
+                $location = "Location:" . $_SESSION['page'];
+                 $user->goto($location);
             }
             if ($checkpins && $checksponsor && $checkpinsavail) {
                 $login = new userModel();
@@ -367,12 +379,14 @@ if ($submit == "addaccount") {
             $checksponsor = $user->checksharesponsor($validate['sponsor']);
     
             if (!$checkpins) {
-                //echo "PINS are currently not available";
-                $_SESSION['script'] = "<script type='text/javascript'>
-                $(document).ready(function(e) {
-                    notifyUser('regerror');
-                });
-                </script>";
+                 //echo "PINS are currently not available";
+                 $_SESSION['script'] = "<script type='text/javascript'>
+                 $(document).ready(function(e) {
+                     notifyUser('pinsused');
+                 });
+                 </script>";
+                 $location = "Location:" . $_SESSION['page'];
+                 $user->goto($location);
             }
             if (!$checkpinsavail) {
                 $_SESSION['script'] = "<script type='text/javascript'>
@@ -380,6 +394,8 @@ if ($submit == "addaccount") {
                     notifyUser('regerror');
                 });
                 </script>";
+                $location = "Location:" . $_SESSION['page'];
+                 $user->goto($location);
             }
             if (!$checksponsor) {
                 //echo "No Sponsor ID Exists";
@@ -389,6 +405,8 @@ if ($submit == "addaccount") {
                     notifyUser('regerror');
                 });
                 </script>";
+                $location = "Location:" . $_SESSION['page'];
+                 $user->goto($location);
             }
             if ($checkpins && $checksponsor && $checkpinsavail) {
                 $login = new userModel();
@@ -421,6 +439,7 @@ if ($submit == "addaccount") {
             $validate['pinid'] = $pinid[0]['DTM_PIN_ID'];
             //print_r($validate['pinid']);
             $checkpins = $user->checkdtmpins($validate);
+            //die(var_dump($checkpins));
             //var_dump($checkpins);
             $checkpinsavail = $user->checkdtmpinsavail($validate);
             //var_dump($checkpinsavail);
@@ -432,9 +451,11 @@ if ($submit == "addaccount") {
                 //echo "PINS are currently not available";
                 $_SESSION['script'] = "<script type='text/javascript'>
                 $(document).ready(function(e) {
-                    notifyUser('regerror');
+                    notifyUser('pinsused');
                 });
                 </script>";
+                $location = "Location:" . $_SESSION['page'];
+                $user->goto($location);
             }
             if (!$checkpinsavail) {
                 $_SESSION['script'] = "<script type='text/javascript'>
@@ -442,6 +463,8 @@ if ($submit == "addaccount") {
                     notifyUser('regerror');
                 });
                 </script>";
+                $location = "Location:" . $_SESSION['page'];
+                $user->goto($location);
             }
             if (!$checksponsor) {
                 //echo "No Sponsor ID Exists";
@@ -455,11 +478,11 @@ if ($submit == "addaccount") {
             if ($checkpins && $checksponsor && $checkpinsavail) {
                 $login = new userModel();
                 $location = "Location: ../user/registration_form.php?sp=" . $validate['sponsor'] . "&p1=" . $validate['pin1'] . "&p2=" . $validate['pin2'] . "&type=Member";
-                $_SESSION['script'] = "<script type='text/javascript'>
-                $(document).ready(function(e) {
-                    notifyUser('success');
-                });
-                </script>";
+                // $_SESSION['script'] = "<script type='text/javascript'>
+                // $(document).ready(function(e) {
+                //     notifyUser('success');
+                // });
+                // </script>";
                 //$login->goto($location);
                 $_SESSION['register'] =  TRUE;
                 $_SESSION['user'] =  'dtm30';
@@ -815,6 +838,13 @@ if ($submit == "addaccount") {
                 }
             endif;
             $user->commit();
+            $_SESSION['script'] = "<script type='text/javascript'>
+	        $(document).ready(function(e) {
+	            notifyUser('success');
+	        });
+	        </script>";
+            $location = "Location:" . $_SESSION['page'];
+            $user->goto($location);
         }catch(Exception $e){
             $user->rollback();
             die(var_dump($e));
