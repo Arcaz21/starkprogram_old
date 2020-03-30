@@ -191,8 +191,9 @@ include __DIR__."/../../controllers/loginFunctions.php";
       function notifyUser3(message){
           if(message =="announcment"){
               new PNotify({
-                  title: 'New System Update v2.0',
-                text: 'Great News! To enhance our service we will be releasing a major update. This include a new User Interface and new system process. <br> In preparation for this update we request all trading account to connect/sync your account to your subscription users.<br>',
+                hide: false,
+                  title: 'Advisory.',
+                text: 'Due to covid-19 cases worldwide. Forex market is totally down and were waiting for recovery. In this case widrawal of funds is on hold and yet we need to tap up additional funds to recover the floating positions. Now our payout is highly affected at this time. We need your understanding for delays and might be scheduled payouts must be done. Banks transaction also is limited and our staffs need to be safe also. So totally no transaction will be made. Pls hold on and were doing our best to overcome this crisis. Keep safe and stay at home. Thank you. <br>By: CEO and Management',
                 type: 'alert',
                 styling: 'bootstrap3'
               }); 
